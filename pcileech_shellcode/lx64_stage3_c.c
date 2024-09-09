@@ -24,6 +24,8 @@ extern QWORD m_page_to_phys(QWORD qwAddr_KallsymsLookupName, QWORD p1);
 extern VOID callback_walk_system_ram_range();
 extern VOID callback_ismemread_inrange();
 extern VOID CacheFlush();
+extern VOID SupervisorWriteEnable();
+extern VOID SupervisorWriteDisable();
 
 #define LOOKUP_FUNCTION(pk, szFn) (SysVCall(pk->AddrKallsymsLookupName, szFn))
 
@@ -39,7 +41,7 @@ typedef struct _TIMEVAL {
 
 typedef struct tdFNLX { // VOID definitions for LINUX functions (used in main control program)
 	QWORD msleep;
-	QWORD alloc_pages_current;
+	QWORD alloc_pages_noprof;
 	QWORD set_memory_x;
 	QWORD __free_pages;
 	QWORD memcpy;
@@ -122,7 +124,7 @@ QWORD AllocateMemoryDma(PKMDDATA pk, BOOL fRetry)
 {
 	QWORD i, pStructPages[3], pa[2];
 	for(i = 0; i < 2; i++) {
-		pStructPages[i] = SysVCall(pk->fn.alloc_pages_current, 0x14, 10);
+		pStructPages[i] = SysVCall(pk->fn.alloc_pages_noprof, 0x14, 10);
 		pa[i] = pStructPages[i] ? m_page_to_phys(pk->AddrKallsymsLookupName, pStructPages[i]) : 0;
 	}
 	// success
@@ -217,6 +219,12 @@ VOID stage3_c_EntryPoint(PKMDDATA pk)
 	if(!fROX) {
 		SysVCall(pk->fn.set_memory_x, pk->DMAAddrVirtual, pk->DMASizeBuffer / 4096);
 	}
+
+	SupervisorWriteEnable();
+	// 1a: mark writeable 	
+	SysVCall(pk->fn.set_memory_rw, pk->DMAAddrVirtual, pk->DMASizeBuffer / 4096);
+	SupervisorWriteDisable();
+
 	// 2: main dump loop
 	SysVCall(pk->fn.do_gettimeofday, &timeLast);
 	while(TRUE) {

@@ -65,7 +65,7 @@ LookupFunctions PROC
 	; ----------------------------------------------------
 	LEA rax, str_msleep
 	PUSH rax
-	LEA rax, str_alloc_pages_current
+	LEA rax, str_alloc_pages_noprof
 	PUSH rax
 	LEA rax, str_set_memory_x
 	PUSH rax
@@ -118,7 +118,7 @@ LookupFunctions PROC
 	MOV [r14+9*8], rax
 	lookup_finish_ioremap:
 	; ----------------------------------------------------
-	; 4: IF 'alloc_pages_current' DOES NOT EXIST FALLBACK TO 'alloc_pages'
+	; 4: IF 'alloc_pages_noprof' DOES NOT EXIST FALLBACK TO 'alloc_pages'
 	; ----------------------------------------------------
 	MOV rax, [r14+1*8]
 	TEST rax, rax
@@ -135,7 +135,7 @@ LookupFunctions PROC
 	RET
 LookupFunctions ENDP
 
-str_alloc_pages_current			db		'alloc_pages_current', 0
+str_alloc_pages_noprof			db		'alloc_pages_noprof', 0
 str_set_memory_nx				db		'set_memory_nx', 0
 str_set_memory_rox				db		'set_memory_rox', 0
 str_set_memory_rw				db		'set_memory_rw', 0
@@ -325,5 +325,24 @@ CacheFlush PROC
 	WBINVD
 	RET
 CacheFlush ENDP
+
+; ----------------------------------------------------
+; ENABLE SUPERVISOR WRITE
+; ----------------------------------------------------
+SupervisorWriteEnable PROC
+	MOV rcx, cr0
+	PUSH rcx
+	AND ecx, 0fffeffffh
+	MOV cr0, rcx
+SupervisorWriteEnable ENDP
+
+; ----------------------------------------------------
+; DISABLE SUPERVISOR WRITE
+; ----------------------------------------------------
+SupervisorWriteDisable PROC
+	MOV     rcx, cr0           ; Retrieve the CR0 value
+	OR      rcx, 00010000h     ; Set bit 16 (WP) back to 1
+	MOV     cr0, rcx           ; Restore the original CR0 value
+SupervisorWriteDisable ENDP
 
 END

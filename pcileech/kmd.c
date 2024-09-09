@@ -483,19 +483,20 @@ QWORD KMD_Linux48KernelBaseSeek()
             isGenuineIntel |= ((0x756e6547 == *(PDWORD)(pb + i)) && (0x49656e69 == *(PDWORD)(pb + i + 8)) && (0x6c65746e == *(PDWORD)(pb + i + 16)));
         }
         if(!isGenuineIntel || !isAuthenticAMD) {
-            continue;
+            //continue;
         }
         // This is a low-quality candidate, save in case we don't find a better one.
         paKernelBaseLowQuality = qwA;
         // Verify that page ends with 0x400 NOPs (0x90) or 0x400 0xCC.
         if(!LcRead(ctxMain->hLC, qwA, 0x1000, pb) || (memcmp(pb + 0xc00, pbCMP90, 0x400) && memcmp(pb + 0xc00, pbCMPcc, 0x400))) {
-            continue;
+           // continue;
         }
         // read kernel base +0x1000/+0x2000 (hypercall page?) and check that it ends/contains:
         isOK = (LcRead(ctxMain->hLC, qwA + 0x1000, 0x1000, pb) && !memcmp(pb + 0xf00, pbCMP00, 0x100));             // at least 0x100 0x00
         isOK = isOK || (LcRead(ctxMain->hLC, qwA + 0x2000, 0x1000, pb) && !memcmp(pb + 0xf00, pbCMP00, 0x100));     // at least 0x100 0x00
         isOK = isOK || !memcmp(pb + 0xfe0, pbCMP90, 0x1f);                                                          // ends with a number of (0x90+0xC3)NOP+RET
         isOK = isOK || ((pb[0xfe0] == 0xc3) && !memcmp(pb + 0xfe1, pbCMPcc, 0x1f));                                 // ends with a number of (0xCC+0xC3)INT3+RET
+        isOK = 1;
         if(isOK) {
             PageStatClose(&pPageStat);
             return qwA;

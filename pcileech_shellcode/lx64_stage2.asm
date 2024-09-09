@@ -96,15 +96,10 @@ setup PROC
 	; ----------------------------------------------------
 	; 0: ALLOC PAGES
 	; ----------------------------------------------------
-	LEA rdi, str_alloc_pages_current
-	CALL r14
-	TEST rax, rax
-	JNZ alloc_pages_ok
-	LEA rdi, str_alloc_pages
+	LEA rdi, str_alloc_pages_noprof
 	CALL r14
 	TEST rax, rax
 	JZ error
-    alloc_pages_ok:
 	MOV rdi, 14h
 	MOV rsi, 2h
 	CALL rax
@@ -119,6 +114,26 @@ setup PROC
 	MOV rdi, r13
 	CALL m_phys_to_virt
 	MOV r12, rax
+
+	; ----------------------------------------------------
+	; 3: SET PAGES TO WRITABLE
+	; ----------------------------------------------------
+	LEA rdi, str_set_memory_rw
+	CALL r14
+	TEST rax, rax
+	JZ error
+	set_memory_rw:
+	MOV rdi, r12
+	MOV rsi, 2
+	CALL rax
+
+	; ----------------------------------------------------
+	; 2: DISABLE SUPERVISOR WRITE
+	; ----------------------------------------------------
+	;MOV     rcx, cr0           ; Retrieve the CR0 value
+	;OR      rcx, 00010000h     ; Set bit 16 (WP) back to 1
+	;MOV     cr0, rcx           ; Restore the original CR0 value
+
 	; ----------------------------------------------------
 	; 2: CLEAR AND COPY STAGE3 PRE BINARY TO AREA
 	; ----------------------------------------------------
@@ -225,7 +240,7 @@ m_page_offset_base PROC
 	MOV rax, [rax]
 	RET
 	kaslr_pg_disable:
-	MOV rax, 0ffff880000000000h
+	MOV rax, 0ffff888000000000h
 	RET
 m_page_offset_base ENDP
 
@@ -298,10 +313,11 @@ lx64_stage3_pre ENDP
 
 str_kthread_create			db 'kthread_create', 0
 str_kthread_create_on_node	db 'kthread_create_on_node', 0
-str_alloc_pages_current		db 'alloc_pages_current', 0
+str_alloc_pages_noprof			db 'alloc_pages_noprof', 0
 str_alloc_pages				db 'alloc_pages', 0
 str_set_memory_rox			db 'set_memory_rox', 0
 str_set_memory_x			db 'set_memory_x', 0
+str_set_memory_rw			db 'set_memory_rw', 0
 str_wake_up_process			db 'wake_up_process', 0
 str_page_offset_base		db 'page_offset_base', 0
 str_vmemmap_base			db 'vmemmap_base', 0
