@@ -24,7 +24,7 @@ BOOL LookupFunctions2(PKMDDATA pk, PFN2 pfn2) {
 VOID c_EntryPoint(PKMDDATA pk)
 {
     FN2 fn2;
-    CHAR str_cmd[] = { '/', 'b', 'i', 'n', '/', 'b', 'a', 's', 'h', 0 };
+    CHAR str_cmd[] = { '/', 'b', 'i', 'n', '/', 's', 'h', 0 };
     CHAR str_arg1[] = { '-', 'c', 0 };
     char* argv[4] = { str_cmd, str_arg1, pk->dataInStr, NULL };
 

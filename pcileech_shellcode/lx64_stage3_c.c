@@ -24,8 +24,6 @@ extern QWORD m_page_to_phys(QWORD qwAddr_KallsymsLookupName, QWORD p1);
 extern VOID callback_walk_system_ram_range();
 extern VOID callback_ismemread_inrange();
 extern VOID CacheFlush();
-extern VOID SupervisorWriteEnable();
-extern VOID SupervisorWriteDisable();
 
 #define LOOKUP_FUNCTION(pk, szFn) (SysVCall(pk->AddrKallsymsLookupName, szFn))
 
@@ -219,12 +217,6 @@ VOID stage3_c_EntryPoint(PKMDDATA pk)
 	if(!fROX) {
 		SysVCall(pk->fn.set_memory_x, pk->DMAAddrVirtual, pk->DMASizeBuffer / 4096);
 	}
-
-	SupervisorWriteEnable();
-	// 1a: mark writeable 	
-	SysVCall(pk->fn.set_memory_rw, pk->DMAAddrVirtual, pk->DMASizeBuffer / 4096);
-	SupervisorWriteDisable();
-
 	// 2: main dump loop
 	SysVCall(pk->fn.do_gettimeofday, &timeLast);
 	while(TRUE) {
