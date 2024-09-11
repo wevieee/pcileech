@@ -214,10 +214,14 @@ VOID stage3_c_EntryPoint(PKMDDATA pk)
 		return;
 	}
 	pk->DMAAddrVirtual = m_phys_to_virt(pk->AddrKallsymsLookupName, pk->DMAAddrPhysical);
+
+	// 2: mark writeable
+	SysVCall(pk->fn.set_memory_rw, pk->DMAAddrVirtual, pk->DMASizeBuffer / 4096);
+
 	if(!fROX) {
 		SysVCall(pk->fn.set_memory_x, pk->DMAAddrVirtual, pk->DMASizeBuffer / 4096);
 	}
-	// 2: main dump loop
+	// 3: main dump loop
 	SysVCall(pk->fn.do_gettimeofday, &timeLast);
 	while(TRUE) {
 		pk->_status = 1;
