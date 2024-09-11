@@ -326,24 +326,4 @@ CacheFlush PROC
 	RET
 CacheFlush ENDP
 
-; ----------------------------------------------------
-; ENABLE SUPERVISOR WRITE
-; ----------------------------------------------------
-SupervisorWriteEnable PROC
-	MOV rcx, cr0
-	AND ecx, 0fffeffffh
-	MOV cr0, rcx
-	RET
-SupervisorWriteEnable ENDP
-
-; ----------------------------------------------------
-; DISABLE SUPERVISOR WRITE
-; ----------------------------------------------------
-SupervisorWriteDisable PROC
-	MOV     rcx, cr0           ; Retrieve the CR0 value
-	OR      rcx, 00010000h     ; Set bit 16 (WP) back to 1
-	MOV     cr0, rcx           ; Restore the original CR0 value
-	RET
-SupervisorWriteDisable ENDP
-
 END
