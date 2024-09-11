@@ -128,13 +128,6 @@ setup PROC
 	CALL rax
 
 	; ----------------------------------------------------
-	; 2: DISABLE SUPERVISOR WRITE
-	; ----------------------------------------------------
-	;MOV     rcx, cr0           ; Retrieve the CR0 value
-	;OR      rcx, 00010000h     ; Set bit 16 (WP) back to 1
-	;MOV     cr0, rcx           ; Restore the original CR0 value
-
-	; ----------------------------------------------------
 	; 2: CLEAR AND COPY STAGE3 PRE BINARY TO AREA
 	; ----------------------------------------------------
 	MOV rdi, r12
@@ -240,7 +233,7 @@ m_page_offset_base PROC
 	MOV rax, [rax]
 	RET
 	kaslr_pg_disable:
-	MOV rax, 0ffff888000000000h
+	MOV rax, 0ffff880000000000h
 	RET
 m_page_offset_base ENDP
 
